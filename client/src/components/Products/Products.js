@@ -2,20 +2,12 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Query } from 'react-apollo'
-import gql from 'graphql-tag'
 
 import SubHeader from '../Header/SubHeader';
 import ProductItem from './ProductItem';
+import Filters from './Filter'
 
-const GET_PRODUCTS = gql`
-  query getProducts {
-    products {
-      id
-      title
-      thumbnail
-    }
-  }
-`;
+import { GET_PRODUCTS, GET_LIMIT } from '../../constants'
 
 const ProductItemsWrapper = styled.div`
   display: flex;
@@ -40,22 +32,28 @@ const Products = ({ match, history }) => {
           goToCart={() => history.push('/cart')}
         />
       )}
-      <Query query={GET_PRODUCTS} >
-        {({ loading, error, data }) => { 
-          if (loading || error ) {
-            return <Alert>{loading ? 'Loading...' : error}</Alert>
-          }
-          return (
-            <ProductItemsWrapper>
-              {data.products &&
-                data.products.map(product => (
-                  <ProductItem key={product.id} data={product} />
-                ))}
-            </ProductItemsWrapper>
-          )
-        }}
+      <Query query={GET_LIMIT}>
+        {({data}) => (
+          <>
+            <Filters limit={parseInt(data.limit)} />
+            <Query query={GET_PRODUCTS} variables={{ limit: parseInt(data.limit) }} >
+              {({ loading, error, data }) => { 
+                if (loading || error ) {
+                  return <Alert>{loading ? 'Loading...' : error}</Alert>
+                }
+                return (
+                  <ProductItemsWrapper>
+                    {data.products &&
+                      data.products.map(product => (
+                        <ProductItem key={product.id} data={product} />
+                      ))}
+                  </ProductItemsWrapper>
+                )
+              }}
+            </Query>
+          </>
+        )}
       </Query>
-
     </>
   );
 };

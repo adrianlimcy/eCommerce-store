@@ -1,15 +1,9 @@
 import React from 'react';
 import { Query } from 'react-apollo'
-import gql from 'graphql-tag'
+
 import Button from '../Button/Button';
 
-const GET_CART_TOTAL = gql`
-  query getCartTotal {
-    cat {
-      total
-    }
-  }
-`;
+import { GET_CART_TOTAL } from '../../constants'
 
 const CartButton = ({ onClick }) => (
 
