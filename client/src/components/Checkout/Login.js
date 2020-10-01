@@ -1,6 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
+
+import { useMutation } from 'react-apollo'
+
 import Button from '../Button/Button';
+
+import { LOGIN_USER } from '../../constants'
 
 const LoginWrapper = styled.div`
   display: flex;
@@ -22,7 +27,8 @@ const TextInput = styled.input`
   margin-bottom: 10px;
 `;
 
-const Login = () => {
+const Login = ({history}) => {
+  const [loginUser] = useMutation(LOGIN_USER)
   const [userName, setUserName] = React.useState('');
   const [password, setPassword] = React.useState('');
 
@@ -38,7 +44,24 @@ const Login = () => {
         value={password}
         placeholder='Your password'
       />
-      <Button color='royalBlue'>Login</Button>
+      <Button 
+        color='royalBlue'
+        onClick={ 
+          async () => {
+            const { data } = await loginUser({
+              variables: { userName, password }
+            })
+
+            if (data.loginUser && data.loginUser.token ) {
+              sessionStorage.setItem('token', data.loginUser.token)
+              return history.push('/checkout')
+            } else {
+              alert('Please provide (valid) authentication details')
+            }
+        }}          
+      >
+          Login
+      </Button>
     </LoginWrapper>
   );
 };
