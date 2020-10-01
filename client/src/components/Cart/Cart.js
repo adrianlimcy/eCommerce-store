@@ -1,8 +1,25 @@
 import React from 'react';
 import styled from 'styled-components';
+
+import { Query } from 'react-apollo'
+import gql from 'graphql-tag'
+
 import SubHeader from '../Header/SubHeader';
 import ProductItem from '../Products/ProductItem';
 import Totals from './Totals';
+
+const GET_CART = gql`
+  query getCart {
+    cart {
+        total
+        products {
+          id
+          title
+          thumbnail
+        }
+    }
+  }
+`;
 
 const CartWrapper = styled.div`
   display: flex;
@@ -22,24 +39,30 @@ const Alert = styled.span`
   text-align: center;
 `;
 
-const Cart = ({ history, loading, error, cart }) => (
+const Cart = ({ match, history }) => (
   <>
     {history && (
-      <SubHeader title='Cart' goToCart={() => history.push('/cart')} />
+      <SubHeader goBack= { () => history.goBack() } title='Cart' />
     )}
-    {!loading && !error ? (
-      <CartWrapper>
-        <CartItemsWrapper>
-          {cart.products &&
-            cart.products.map(product => (
-              <ProductItem key={product.id} data={product} />
-            ))}
-        </CartItemsWrapper>
-        <Totals count={cart.total} />
-      </CartWrapper>
-    ) : (
-      <Alert>{loading ? 'Loading...' : error}</Alert>
-    )}
+    <Query query={GET_CART} >
+      {({ loading, error, cart }) => {
+        if (loading || error ) {
+          return <Alert>{loading ? 'Loading...' : error}</Alert>
+        }
+        return (
+          <CartWrapper>
+            <CartItemsWrapper>
+              {cart.products &&
+                cart.products.map(product => (
+                  <ProductItem key={product.id} data={product} />
+                ))}
+            </CartItemsWrapper>
+            <Totals count={cart.total} />
+          </CartWrapper>
+        )
+      }}
+
+    </Query>
   </>
 );
 
